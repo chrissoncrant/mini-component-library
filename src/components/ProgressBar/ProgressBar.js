@@ -9,59 +9,60 @@ const SIZES = {
   small: {
     height: '0.5rem',
   },
+  medium: {
+    height: '0.75rem',
+  },
   large: {
-    height: '1.5rem',
-    padding: '0.25rem'
+    height: '1rem',
+    padding: '0.25rem',
   }
 }
 
 const ProgressBar = ({ value, size }) => {
 
+  const currentSize = SIZES[size];
+
+  if (!currentSize) {
+    throw new Error(`Unknown size value passed into ProgressBar: ${size}`)
+  };
+
   return (
-    <Wrapper>
-      <ValueDisplay for="progress-bar">{value}</ValueDisplay>
-      <ProgressBase id="progress-bar" max="100" value={value} size={SIZES[size]}></ProgressBase>
+    <Wrapper
+      role="progressBar"
+      aria-valuenow={value}
+      aria-aria-valuemin="0"
+      aria-aria-valuemax="100"
+      padding={currentSize.padding}
+      size={size}
+    >
+      <VisuallyHidden>90%</VisuallyHidden>
+      <BarWrapper size={size}>
+        <Bar size={currentSize} style={{'--width': value + '%'}}/>
+      </BarWrapper>
     </Wrapper>
   )
 };
 
 const Wrapper = styled.div`
-  display: flex;
-  align-items: center;
+  background-color: ${COLORS.transparentGray15};
+  box-shadow: inset 0px 2px 4px ${COLORS.transparentGray35};
+  border-radius: ${props => props.size === 'large' ? '12px' : '4px'};
+  padding: ${props => props.padding};
+
+  /* Trim progress bar corners */
+  overflow: hidden;
 `;
 
-const ValueDisplay = styled.label`
-  margin-right: 0.6rem;
-  color: ${COLORS.black};  
-  &::after {
-    content: '%';
-  }
+const BarWrapper = styled.div`
+  /* Trim progress bar corners for large size */
+  overflow: hidden;
+  border-radius: ${props => props.size === 'large' ? '8px' : '4px'};
 `;
 
-
-const ProgressBase = styled.progress`
-  appearance: none;
-  height: ${props => props.size ? props.size.height : '0.75rem'};
-  width: 12rem;
-
-  &::-webkit-progress-bar {
-    border-radius: 10px;
-    overflow: hidden;
-    background-color: ${COLORS.gray50};
-    box-shadow: inset 0px 2px 4px ${COLORS.transparentGray35};
-    padding: ${props => props.size?.padding ? props.size.padding : '0rem'};
-  }
-
-  &::-webkit-progress-value {
-    background-color: ${COLORS.primary};
-    border-radius: ${props => {
-      if (props.value != '100') {
-        return '8px 0px 0px 8px';
-      } else {
-        return '8px';
-      }
-    }};
-  }
+const Bar = styled.div`
+  width: var(--width);
+  height: ${props => props.size.height};
+  background-color: ${COLORS.primary};
 `;
 
 export default ProgressBar;
